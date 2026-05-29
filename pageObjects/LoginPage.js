@@ -16,6 +16,10 @@ class LoginPage {
         await this.page.goto('/')
     }
 
+    async verifyErrorMessage(errorMessage) {
+        await expect(this.errorContainer).toContainText(errorMessage)
+    }
+
     async login(username, password) {
         await this.usernameTxtbox.fill(username)
         await this.passwordTxtbox.fill(password)
@@ -29,7 +33,7 @@ class LoginPage {
 
     async lockedUserLogin(username, password) {
         await this.login(username, password)
-        await expect(this.errorContainer).toContainText('Sorry, this user has been locked out.')
+        await this.verifyErrorMessage('Sorry, this user has been locked out.')
     }
 
 

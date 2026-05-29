@@ -29,3 +29,23 @@ test('Login with locked out user', async () => {
         dataset.password
     )
 })
+
+test('Login with invalid password', async () => {
+    await loginPage.login(dataset.validUsername, dataset.invalidPassword)
+    await loginPage.verifyErrorMessage('Username and password do not match any user in this service')
+})
+
+test('Login with blank username', async () => {
+    await loginPage.login("", dataset.password)
+    await loginPage.verifyErrorMessage('Username is required')
+})
+
+test('Login with blank password', async () => {
+    await loginPage.login(dataset.validUsername, "")
+    await loginPage.verifyErrorMessage('Password is required')
+})
+
+test('Login with blank username and password', async () => {
+    await loginPage.login("", "")
+    await loginPage.verifyErrorMessage('Username is required')
+})
