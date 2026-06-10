@@ -1,4 +1,3 @@
-const { test, expect } = require('@playwright/test')
 const { LoginPage } = require('../pageObjects/LoginPage')
 const { InventoryPage } = require('../pageObjects/InventoryPage')
 
