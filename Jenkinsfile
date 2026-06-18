@@ -9,6 +9,7 @@ pipeline {
     environment {
         CI = 'true'
         HEADLESS = 'true'
+        PATH = '/Users/thiruyogi/.nvm/versions/node/v18.20.0/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin'
     }
 
     stages {
@@ -20,7 +21,14 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm ci'
+                sh '''
+                    echo "PATH=$PATH"
+                    which node
+                    which npm
+                    node -v
+                    npm -v
+                    npm ci
+                '''
             }
         }
 
