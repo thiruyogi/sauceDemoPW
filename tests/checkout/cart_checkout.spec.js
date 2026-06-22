@@ -140,3 +140,88 @@ test('Checkout with missing all fields @regression', async ({ page }) => {
     await page.checkoutPage.verifyErrorMessage('Error: Postal Code is required')
     log.info('Completed required field validation for checkout')
 })
+
+test ('Complete order successfully @regression', async ({ page }) => {
+    let items_to_add = dataset.products
+    log.info('Preparing products for complete order validation', { products: items_to_add })
+    for (const item of items_to_add) {
+        if (await page.inventoryPage.verifyItemAlreadyAddedToCart(item)) {
+            log.info('Product is already added to cart', { productName: item })
+            log.info('Removing product from cart', { productName: item })
+            await page.inventoryPage.removeFromCart(item)
+        }
+        log.info('Adding product to cart', { productName: item })
+        await page.inventoryPage.addToCart(item)
+    }
+    log.info('Navigating to cart page')
+    await page.cartPage.goToCartPage()
+    log.info('Proceeding to checkout page')
+    await page.cartPage.proceedToCheckout()
+    log.info('Entering valid checkout user details')
+    await page.checkoutPage.enterUserDetails(dataset.firstName, dataset.lastName, dataset.zipCode)
+    log.info('Verifying checkout page title is visible')
+    for (const item of items_to_add) {
+        log.info('Verifying product in checkout overview', { productName: item })
+        await page.checkoutPage.verifyItemPresentInList(item)
+    }
+    log.info('Finishing order')
+    await page.checkoutPage.finishOrder()
+    log.info('Verifying checkout complete page title is visible')
+    await page.checkoutPage.verifyCheckoutCompleteMessage()
+    log.info('Completed complete order validation')
+})
+
+test('Cancel checkout from information page', async ({ page }) => {
+    let items_to_add = dataset.products
+    log.info('Preparing products for checkout navigation validation', { products: items_to_add })
+    for (const item of items_to_add) {
+        if (await page.inventoryPage.verifyItemAlreadyAddedToCart(item)) {
+            log.info('Product is already added to cart', { productName: item })
+            log.info('Removing product from cart', { productName: item })
+            await page.inventoryPage.removeFromCart(item)
+        }
+        log.info('Adding product to cart', { productName: item })
+        await page.inventoryPage.addToCart(item)
+    }
+    log.info('Navigating to cart page')
+    await page.cartPage.goToCartPage()
+    for (const item of items_to_add) {
+        log.info('Verifying product is displayed in cart', { productName: item })
+        await page.cartPage.verifyItemPresentInCart(item)
+    }
+    log.info('Proceeding to checkout from cart page')
+    await page.cartPage.proceedToCheckout()
+    log.info('Verifying checkout page title is visible')
+    await page.checkoutPage.verifyCheckoutPageTitle()
+    log.info('Cancelling checkout from information page')
+    await page.checkoutPage.cancelCheckout()
+    log.info('Verifying user is redirected to cart page')
+    for (const item of items_to_add) {
+        log.info('Verifying product is displayed in cart', { productName: item })
+        await page.cartPage.verifyItemPresentInCart(item)
+    }
+})
+
+test('Cart badge update on add/remove sequence', async ({ page }) => {
+    let items_to_add = dataset.products
+    log.info('Preparing products for cart badge update validation', { products: items_to_add })
+    for (const item of items_to_add) {
+        if (await page.inventoryPage.verifyItemAlreadyAddedToCart(item)) {
+            log.info('Product is already added to cart', { productName: item })
+            log.info('Removing product from cart', { productName: item })
+            await page.inventoryPage.removeFromCart(item)
+        }
+        log.info('Adding product to cart', { productName: item })
+        await page.inventoryPage.addToCart(item)
+    }
+    log.info('Verifying cart badge count is 3')
+    await page.inventoryPage.verifyCartCount('3')
+    log.info('Removing product from cart')
+    await page.inventoryPage.removeFromCart(items_to_add[0])
+    log.info('Verifying cart badge count is 2')
+    await page.inventoryPage.verifyCartCount('2')
+    log.info('Adding product to cart')
+    await page.inventoryPage.addToCart(items_to_add[0])
+    log.info('Verifying cart badge count is 3')
+    await page.inventoryPage.verifyCartCount('3')
+})

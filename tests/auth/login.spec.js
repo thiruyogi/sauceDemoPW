@@ -63,3 +63,25 @@ test('Verify handling of spaces in credentials Username and password do not matc
     await loginPage.login(dataset.validUsername+' ', dataset.password+" ")
     await loginPage.verifyErrorMessage('Username and password do not match any user in this service')
 })
+
+test('Logout from the application', async () => {
+    log.info('Logging in with standard user', { username: dataset.validUsername, password: dataset.password })
+    await loginPage.loginWithAssert(dataset.validUsername, dataset.password)
+    log.info('Logging out from the application')
+    await loginPage.logout()
+    log.info('Verifying user is redirected to login page')
+    await loginPage.verifyLogout()
+})
+
+test('Access inventory page after logout using browser back button', async ({ page }) => {
+    log.info('Logging in with standard user', { username: dataset.validUsername, password: dataset.password })
+    await loginPage.loginWithAssert(dataset.validUsername, dataset.password)
+    log.info('Logging out from the application')
+    await loginPage.logout()
+    log.info('Verifying user is redirected to login page')
+    await loginPage.verifyLogout()
+    log.info('Accessing inventory page using browser back button')
+    await page.goBack()
+    log.info('Verifying user is redirected to inventory page')
+    await loginPage.verifyErrorMessage("Epic sadface: You can only access \'/inventory.html\' when you are logged in.")
+})

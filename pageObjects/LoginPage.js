@@ -10,6 +10,8 @@ class LoginPage {
         this.passwordTxtbox = page.locator('#password')
         this.signInButton = page.getByRole('button', { name: 'Login' })
         this.errorContainer = page.locator('[data-test="error"]')
+        this.menuButton = page.getByRole('button', { name: 'Open Menu' })
+        this.logoutButton = page.locator('#logout_sidebar_link')
 
     }
 
@@ -39,6 +41,15 @@ class LoginPage {
     async lockedUserLogin(username, password) {
         await this.login(username, password)
         await this.verifyErrorMessage('Sorry, this user has been locked out.')
+    }
+
+    async logout() {
+        await this.menuButton.click()
+        await this.logoutButton.click()
+    }
+
+    async verifyLogout() {
+        await expect(this.page).toHaveURL('https://www.saucedemo.com/')
     }
 
 

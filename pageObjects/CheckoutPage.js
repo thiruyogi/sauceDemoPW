@@ -12,6 +12,8 @@ class CheckoutPage {
         this.cancelButton = this.page.locator('#cancel')
         this.continueButton = this.page.locator('#continue')
         this.errorContainer = page.locator('[data-test="error"]')
+        this.finishButton = this.page.locator('#finish')
+        this.completeHeader = this.page.locator('.complete-header')
     }
 
     async verifyCheckoutPageTitle() {
@@ -31,6 +33,18 @@ class CheckoutPage {
 
     async verifyItemPresentInList(itemName) {
         expect(await this.page.locator('.cart_item_label').filter({ hasText: itemName })).toBeVisible()
+    }
+
+    async finishOrder() {
+        await this.finishButton.click()
+    }
+
+    async verifyCheckoutCompleteMessage() {
+        expect(await this.completeHeader.textContent()).toContain('Thank you for your order!')
+    }
+
+    async cancelCheckout() {
+        await this.cancelButton.click()
     }
 }
 

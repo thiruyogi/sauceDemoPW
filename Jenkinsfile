@@ -4,12 +4,12 @@ pipeline {
     options {
         timestamps()
         disableConcurrentBuilds()
+        skipDefaultCheckout(true)
     }
 
     environment {
         CI = 'true'
         HEADLESS = 'true'
-        PATH = '/Users/thiruyogi/.nvm/versions/node/v18.20.0/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin'
     }
 
     stages {
@@ -21,26 +21,44 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                    echo "PATH=$PATH"
-                    which node
-                    which npm
+                bat '''
+                    @echo on
+                    setlocal EnableDelayedExpansion
+                    echo PATH=%PATH%
+                    where node
+                    where npm
                     node -v
-                    npm -v
-                    npm ci
+                    call npm -v
+                    if errorlevel 1 exit /b 1
+                    if exist package-lock.json (
+                        echo package-lock.json found, running npm ci
+                        call npm ci
+                    ) else (
+                        echo package-lock.json not found, running npm install
+                        call npm install
+                    )
+                    if errorlevel 1 exit /b 1
                 '''
             }
         }
 
         stage('Install Playwright Browsers') {
             steps {
-                sh 'npx playwright install'
+                bat '''
+                    @echo on
+                    call npx playwright install
+                    if errorlevel 1 exit /b 1
+                '''
             }
         }
 
         stage('Run Playwright Tests') {
             steps {
-                sh 'npx playwright test'
+                bat '''
+                    @echo on
+                    call npx playwright test
+                    if errorlevel 1 exit /b 1
+                '''
             }
         }
     }
@@ -48,14 +66,14 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'playwright-report/**, test-results/**', allowEmptyArchive: true
-            publishHTML(target: [
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'playwright-report',
-                reportFiles: 'index.html',
-                reportName: 'Playwright HTML Report'
-            ])
+            // publishHTML(target: [
+            //     allowMissing: true,
+            //     alwaysLinkToLastBuild: true,
+            //     keepAll: true,
+            //     reportDir: 'playwright-report',
+            //     reportFiles: 'index.html',
+            //     reportName: 'Playwright HTML Report'
+            // ])
         }
     }
 }
